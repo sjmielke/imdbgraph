@@ -5,7 +5,7 @@ genresfile = "/home/sjm/downloads/genres.list"
 toplist = []
 with open(ratingsfile) as f:
 	for i in range(28): f.readline() # real list starts late in the file
-	for i in range(20):
+	for i in range(50):
 		toplist.append(f.readline())
 
 for i in range(len(toplist)):
@@ -36,9 +36,10 @@ for movie in topdict:
 
 genrelist = sorted(genreset)
 
+
+# detailed table
 for gen in genrelist:
 	print gen,
-
 for movie in topdict:
 	print ''
 	for gen in genrelist:
@@ -46,3 +47,12 @@ for movie in topdict:
 			print '#' + ' ' * (len(gen)-1),
 		else:
 			print '-' + ' ' * (len(gen)-1),
+
+# condensed table
+for movie in topdict:
+	print ''
+	for gen in genrelist:
+		if gen in topdict[movie]:
+			print '#',
+		else:
+			print '-',
