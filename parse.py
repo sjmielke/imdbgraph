@@ -1,9 +1,9 @@
-#! /usr/bin/python
+#! /usr/bin/python3
 ratingsfile = "ratings.list"
 genresfile = "genres.list"
 
 toplist = []
-with open(ratingsfile) as f:
+with open(ratingsfile, encoding="iso-8859-1") as f:
 	for i in range(28): f.readline() # real list starts late in the file
 	for i in range(250):
 		toplist.append(f.readline())
@@ -15,7 +15,7 @@ toplist.sort()
 
 line = "blubb"
 topdict = {}
-with open(genresfile) as f:
+with open(genresfile, encoding="iso-8859-1") as f:
 	f.seek(14000) # skip intro with wrong schindlers list
 	for filmtitle in toplist:
 		found = 0
@@ -32,8 +32,8 @@ with open(genresfile) as f:
 				break
 		topdict.update({filmtitle: genrelist})
 
-print topdict
-print '\n'
+print(topdict)
+print()
 
 # generate list of all used genres
 genreset = set()
@@ -46,20 +46,20 @@ genrelist = sorted(genreset)
 
 # detailed table
 for gen in genrelist:
-	print gen,
+	print(gen, end=" ")
 for movie in topdict:
-	print ''
+	print()
 	for gen in genrelist:
 		if gen in topdict[movie]:
-			print '#' + ' ' * (len(gen)-1),
+			print('#' + ' ' * len(gen), end="")
 		else:
-			print '-' + ' ' * (len(gen)-1),
+			print('-' + ' ' * len(gen), end="")
 
 # condensed table
 for movie in topdict:
-	print ''
+	print()
 	for gen in genrelist:
 		if gen in topdict[movie]:
-			print '#',
+			print('#', end="")
 		else:
-			print '-',
+			print('-', end="")
