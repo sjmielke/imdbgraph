@@ -9,7 +9,7 @@ ratingsfile = "ratings.list"
 genresfile = "genres.list"
 dotfile = "graph.dot"
 htmlfile = "index.htm"
-max = 250
+max = 100
 
 def generate_topdict():
 	toplist = []
@@ -87,8 +87,8 @@ for movie in topdict:
 with open(dotfile, "w") as f:
 	f.write('graph G {\n')
 	#f.write('rankdir = LR;\n')
-	f.write('overlap=prism;\n')
-	#f.write('size="10,10";\n')
+	#f.write('overlap=ortho;\n')
+	f.write('size="10,10";\n')
 
 	# Add labeled nodes
 	for movie in topdict:
@@ -97,6 +97,7 @@ with open(dotfile, "w") as f:
 	usedgenreset = set()
 	for genre in genrelist:
 		#print(genre)
+		#f.write('subgraph cluster'+sjmhash(genre)+' {\nlabel="'+genre+'";\n')
 		for movie, genres in sorted(topdict.items()):
 			#print('\t'+movie)
 			for other, othergenres in sorted(topdict.items()):
@@ -106,6 +107,7 @@ with open(dotfile, "w") as f:
 					f.write(sjmhash(movie)+' -- '+sjmhash(other)+' [color="' + colorhash(genre) + '", penwidth=3];\n')
 					#print('\t\t'+other)
 					break
+		#f.write('\n}')
 	f.write('\n}')
 	
 	with open(htmlfile, "w") as h:
