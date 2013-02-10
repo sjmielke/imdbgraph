@@ -1,47 +1,49 @@
 #! /usr/bin/python3
-
 import os
-
 ratingsfile = "ratings.list"
 genresfile = "genres.list"
 dotfile = "graph.dot"
 
+def generate_topdict():
+	toplist = []
+	with open(ratingsfile, encoding="iso-8859-1") as f:
+		for i in range(28): f.readline() # real list starts late in the file
+		for i in range(50):
+			toplist.append(f.readline())
+
+	for i in range(len(toplist)):
+		toplist[i] = toplist[i][32:-1]
+
+	toplist.sort()
+
+	line = "blubb"
+	topdict = {}
+	with open(genresfile, encoding="iso-8859-1") as f:
+		f.seek(14000) # skip intro with wrong schindlers list
+		for filmtitle in toplist:
+			found = 0
+			genrelist = []
+			while 1:
+				if line.find(filmtitle+'\t') >= 0: # The \t is necessary to filter out Title (year) (VG) duplicates
+					genrelist.append(line[line.rfind('\t')+1:-1])
+					found = 1
+				elif found == 1:
+					break
+
+				line = f.readline()
+				if line == "":
+					break
+			topdict.update({filmtitle: genrelist})
+	return topdict
+
 def sjmhash(o):
 	return '_'+str(hash(o)).replace('-','m')
 
-toplist = []
-with open(ratingsfile, encoding="iso-8859-1") as f:
-	for i in range(28): f.readline() # real list starts late in the file
-	for i in range(50):
-		toplist.append(f.readline())
-
-for i in range(len(toplist)):
-	toplist[i] = toplist[i][32:-1]
-
-toplist.sort()
-
-line = "blubb"
-topdict = {}
-with open(genresfile, encoding="iso-8859-1") as f:
-	f.seek(14000) # skip intro with wrong schindlers list
-	for filmtitle in toplist:
-		found = 0
-		genrelist = []
-		while 1:
-			if line.find(filmtitle+'\t') >= 0: # The \t is necessary to filter out Title (year) (VG) duplicates
-				genrelist.append(line[line.rfind('\t')+1:-1])
-				found = 1
-			elif found == 1:
-				break
-
-			line = f.readline()
-			if line == "":
-				break
-		topdict.update({filmtitle: genrelist})
-
+topdict = generate_topdict();
 print(topdict)
 print()
 
+'''
 # generate list of all used genres
 genreset = set()
 for movie in topdict:
@@ -50,7 +52,6 @@ for movie in topdict:
 
 genrelist = sorted(genreset)
 
-'''
 # detailed table
 for gen in genrelist:
 	print(gen, end=" ")
