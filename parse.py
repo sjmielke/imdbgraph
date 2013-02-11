@@ -9,7 +9,7 @@ ratingsfile = "ratings.list"
 genresfile = "genres.list"
 dotfile = "graph.dot"
 htmlfile = "index.htm"
-max = 100
+max = 250
 
 def generate_topdict():
 	toplist = []
@@ -47,17 +47,22 @@ def sjmhash(o):
 	return '_' + hashlib.md5(o.encode('iso-8859-1')).hexdigest()
 
 def colorhash(o):
-	return '#' + hashlib.md5(o.encode('iso-8859-1')).hexdigest()[:6]
+	return '#' + hashlib.md5(o.encode('iso-8859-1')).hexdigest()[-6:]
 
 topdict = generate_topdict();
-#print(topdict)
+print(topdict)
 print()
 
 # generate list of all used genres
 genreset = set()
+genreocc = {} # Dict of genre occurence
 for movie in topdict:
 	for genre in topdict[movie]:
 		genreset.add(genre)
+		try:
+			genreocc[genre] += 1
+		except KeyError:
+			genreocc.update({genre: 1})
 
 genrelist = sorted(genreset)
 
@@ -83,24 +88,42 @@ for movie in topdict:
 			print('-', end="")
 '''
 
+# Process the dictionary topdict using the occurence dict to weighdict:
+#	* only once occuring genres are omitted
+#	* after that only the two genres with the least occurences (-> most significant) are used
+weighdict = {}
+for movie, genres in sorted(topdict.items()):
+	twogen = []
+	counter = 0
+	for genre, occ in sorted(genreocc.items(), key = lambda x: x[1]):
+		if genre in genres:
+			twogen.append(genre)
+			counter += 1
+		if counter == 2:
+			break
+	weighdict.update({movie: twogen})
+
+print(weighdict)
+print()
+
 # Simple DOT digraph
 with open(dotfile, "w") as f:
 	f.write('graph G {\n')
 	#f.write('rankdir = LR;\n')
 	#f.write('overlap=ortho;\n')
-	f.write('size="10,10";\n')
+	f.write('size="12,100";\n')
 
 	# Add labeled nodes
-	for movie in topdict:
+	for movie in weighdict:
 		f.write(sjmhash(movie)+' [shape="box", color="gray", penwidth=2, style="filled", fillcolor="#DDDDDD", label="' + movie + '"];\n')
 
 	usedgenreset = set()
 	for genre in genrelist:
 		#print(genre)
 		#f.write('subgraph cluster'+sjmhash(genre)+' {\nlabel="'+genre+'";\n')
-		for movie, genres in sorted(topdict.items()):
+		for movie, genres in sorted(weighdict.items()):
 			#print('\t'+movie)
-			for other, othergenres in sorted(topdict.items()):
+			for other, othergenres in sorted(weighdict.items()):
 				if other <= movie: continue
 				if genre in genres and genre in othergenres:
 					usedgenreset.add(genre)
