@@ -50,8 +50,8 @@ def colorhash(o):
 	return '#' + hashlib.md5(o.encode('iso-8859-1')).hexdigest()[-6:]
 
 topdict = generate_topdict();
-print(topdict)
-print()
+#print(topdict)
+#print()
 
 # generate list of all used genres
 genreset = set()
@@ -99,12 +99,12 @@ for movie, genres in sorted(topdict.items()):
 		if genre in genres:
 			twogen.append(genre)
 			counter += 1
-		if counter == 2:
+		if counter == 3:
 			break
 	weighdict.update({movie: twogen})
 
-print(weighdict)
-print()
+#print(weighdict)
+#print()
 
 # Simple DOT digraph
 with open(dotfile, "w") as f:
@@ -121,10 +121,12 @@ with open(dotfile, "w") as f:
 	for genre in genrelist:
 		#print(genre)
 		#f.write('subgraph cluster'+sjmhash(genre)+' {\nlabel="'+genre+'";\n')
+		servedmovies = [] # This method is more expensive than just progressing lexically and only having to compare, but more flexible
 		for movie, genres in sorted(weighdict.items()):
 			#print('\t'+movie)
+			servedmovies.append(movie);
 			for other, othergenres in sorted(weighdict.items()):
-				if other <= movie: continue
+				if other in servedmovies: continue
 				if genre in genres and genre in othergenres:
 					usedgenreset.add(genre)
 					f.write(sjmhash(movie)+' -- '+sjmhash(other)+' [color="' + colorhash(genre) + '", penwidth=3];\n')
