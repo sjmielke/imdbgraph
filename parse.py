@@ -77,18 +77,32 @@ for movie in topdict:
 			print('#' + ' ' * len(gen), end="")
 		else:
 			print('-' + ' ' * len(gen), end="")
-
-# condensed table
-for movie in topdict:
-	print()
-	for gen in genrelist:
-		if gen in topdict[movie]:
-			print('#', end="")
-		else:
-			print('-', end="")
 '''
 
+# condensed table
+genrestreakset = set()
+count = 1
+countsum = 0
+for movie, genres in sorted(topdict.items(), key = lambda x: x[1]):
+	#print()
+	if set(genres) == genrestreakset:
+		count += 1
+	else:
+		genrestreakset = set(genres)
+		if count > 3:
+			print(count, genres)
+			countsum += count;
+		count = 1	
+	#for gen in genrelist:
+	#	if gen in genres:
+	#		print('#', end="")
+	#	else:
+	#		print('-', end="")
+print(countsum)
+exit()
+
 # Process the dictionary topdict using the occurence dict to weighdict:
+# ---------------------------------------------------------------------
 #	* only once occuring genres are omitted
 #	* after that only the two genres with the least occurences (-> most significant) are used
 weighdict = {}
@@ -97,20 +111,22 @@ for movie, genres in sorted(topdict.items()):
 	counter = 0
 	for genre, occ in sorted(genreocc.items(), key = lambda x: x[1]):
 		if genre in genres:
-			twogen.append(genre)
-			counter += 1
-		if counter == 3:
-			break
+			if counter == 0 or (counter == 1 and occ < max/8):
+				twogen.append(genre)
+				counter += 1
+			else:
+				break
 	weighdict.update({movie: twogen})
 
-#print(weighdict)
+#for mov in weighdict.items():
+#	print(len(mov[1]), end=" ")
 #print()
 
 # Simple DOT digraph
 with open(dotfile, "w") as f:
 	f.write('graph G {\n')
 	#f.write('rankdir = LR;\n')
-	#f.write('overlap=ortho;\n')
+	f.write('overlap=false;\n')
 	f.write('size="12,100";\n')
 
 	# Add labeled nodes
