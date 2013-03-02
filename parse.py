@@ -9,17 +9,29 @@ ratingsfile = "ratings.list"
 genresfile = "genres.list"
 dotfile = "graph.dot"
 htmlfile = "index.htm"
-max = 250
+max = 5
 
 def generate_topdict():
 	toplist = []
+	distlist = []
 	with open(ratingsfile, encoding="iso-8859-1") as f:
-		for i in range(28): f.readline() # real list starts late in the file
+		for i in range(228): f.readline() # real list starts late in the file
 		for i in range(max):
 			toplist.append(f.readline())
 
 	for i in range(len(toplist)):
+		diststring = toplist[i][6:16]
 		toplist[i] = toplist[i][32:-1]
+		print("\nNow processing: " + diststring)
+		score = 0
+		counter = 1
+		for char in diststring:
+			if char == ".":
+				char = "0" 
+			score += (counter-5) * int(char)
+			print((counter-5) * int(char), end=", ")
+			counter += 1
+		print("=> " + str(score))
 
 	toplist.sort()
 
@@ -41,7 +53,7 @@ def generate_topdict():
 				if line == "":
 					break
 			topdict.update({filmtitle: genrelist})
-	return topdict
+	return (topdict, distlist)
 
 def sjmhash(o): return '_' + hashlib.md5(o.encode('iso-8859-1')).hexdigest()
 
@@ -85,7 +97,7 @@ def write_graph(weighdict):
 		
 	os.system('dot -Tsvg graph.dot -o graph.svg')
 
-topdict = generate_topdict()
+topdict = generate_topdict()[0]
 
 # generate list of all used genres
 genreset = set()
@@ -100,6 +112,15 @@ for movie in topdict:
 
 genrelist = sorted(genreset)
 
+# 
+
+
+
+
+
+
+
+'''
 # generate meta-genres
 genrestreakset = set()
 count = 1
@@ -109,7 +130,7 @@ for movie, genres in sorted(topdict.items(), key = lambda x: x[1]):
 		count += 1
 	else:
 		genrestreakset = set(genres)
-		if count > 3:
+		if count > 1:
 			print(count, genres)
 			countsum += count;
 		count = 1
@@ -133,3 +154,4 @@ for movie, genres in sorted(topdict.items()):
 	significant_topdict.update({movie: twogen})
 
 write_graph(significant_topdict)
+'''
