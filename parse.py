@@ -9,29 +9,40 @@ ratingsfile = "ratings.list"
 genresfile = "genres.list"
 dotfile = "graph.dot"
 htmlfile = "index.htm"
-max = 5
+max = 250
+
+def is_masterpiece(full_line, verbose=False):
+	# generate pre-score from vote distribution
+	score = 0
+	counter = 1
+	for char in full_line[6:16]:
+		if char == ".":
+			char = "0" 
+		score += (counter-7) * int(char)
+		#print((counter-7) * int(char), end=", ")
+		counter += 1
+	if verbose: print("=> " + str(score), end="")
+	# multiply pre-score with number of votes
+	if verbose: print(" * " + str(int(full_line[16:27])), end="")
+	score *= int(full_line[16:27])
+	if verbose: print(" = " + str(score))
+	return score
 
 def generate_topdict():
 	toplist = []
 	distlist = []
 	with open(ratingsfile, encoding="iso-8859-1") as f:
-		for i in range(228): f.readline() # real list starts late in the file
+		for i in range(28): f.readline() # real list starts in l.28 in the file
 		for i in range(max):
 			toplist.append(f.readline())
 
 	for i in range(len(toplist)):
-		diststring = toplist[i][6:16]
+		full_line = toplist[i]
 		toplist[i] = toplist[i][32:-1]
-		print("\nNow processing: " + diststring)
-		score = 0
-		counter = 1
-		for char in diststring:
-			if char == ".":
-				char = "0" 
-			score += (counter-5) * int(char)
-			print((counter-5) * int(char), end=", ")
-			counter += 1
-		print("=> " + str(score))
+		#print("\nNow processing: " + full_line, end="")
+		if is_masterpiece(full_line) > 7000000:
+			print(str(is_masterpiece(full_line)) + full_line, end="")
+		distlist.append(is_masterpiece(full_line))
 
 	toplist.sort()
 
